@@ -169,3 +169,71 @@
 # print(phone.isnumeric())
 # phone1="0124.597621"
 # print(phone1.isnumeric())
+
+#Numbers
+
+#Types
+# x = 5
+# y = 7.7
+# z = 2+3j
+# print(type(x))
+# print(type(y))
+# print(type(z))
+
+# print(x * 3)
+# print(int(y))
+# print(float(x))
+# print(complex(x))
+
+#Mathical Operators
+# print(2+3)
+# print(4-2)
+# print(4*2)
+# print(7/2)
+# print(7//2)
+# print(7%2)
+# print(2**3)
+
+# x = 2
+# x = x + 3
+# print(x)
+# x+=6
+# print(x)
+# y=10
+# y-=5
+# print(y)
+# z=5
+# z*=5
+# print(z)
+
+#Rounding
+
+# print(abs(2-10))
+# x=23.5622
+# y=23.45
+# print(round(x))
+# print(round(y))
+# print(round(x,2))
+# import math 
+# print(math.floor(x))
+# print(math.ceil(x))
+# print(math.trunc(x))
+# print(int(x))
+
+#Advanced Math
+# import random
+# print(random.random())
+# print(random.randint(1,6))
+
+# x=7.0
+# print(x.is_integer())
+# y=7.1
+# print(y.is_integer())
+
+# x=70.4
+# y=70.0
+# z=70
+# print(isinstance(x,int))
+# print(isinstance(z,float))
+import random
+print(random.randint(1,100)%2==0)
