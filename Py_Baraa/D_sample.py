@@ -43,14 +43,14 @@
 # print(name,"is from",country)
 
 # Data Types
-a = 5 #int
-b = "Sai" #str
-c = 3.5 #float
-d = True #bool
-e = "123"
-h = None #None type
-j="" #blank (str)
-k=" " #space (str)
+# a = 5 #int
+# b = "Sai" #str
+# c = 3.5 #float
+# d = True #bool
+# e = "123"
+# h = None #None type
+# j="" #blank (str)
+# k=" " #space (str)
 # print(a,b,c,d,e,h,j,k)
 
 # Functions and Methods
@@ -59,4 +59,113 @@ k=" " #space (str)
 # a=5
 # print(a.bit_length())
 
+#print("sai ram")
+# Strings
 
+#Types
+# name="Sai Ganesh"
+# print(type(name))
+# age=25
+# print(type(age))
+# print("your age is :" + str(age))
+# age = age + 5
+# age = str(age)
+# print(age)
+# print(type(age))
+# age = age + 5
+
+#Math
+# password = "123a78c"
+# print(len(password))
+
+# if len (password)<8:
+#     print("Your Password is too short")
+
+# text = """
+# Python is easy to learn
+# Python is powerful
+# Many people love python,
+# """
+# print(text.count("Python"))
+
+#Transformations
+# price="1234,56"
+# print(price.replace(",","."))
+# phone="456-1357-263"
+# print(phone.replace("-",""))
+# cost="$1,299.99"
+# print(cost.replace("$","").replace(",",""))
+# number="+49(176) 123-4567"
+# print(number.replace("+","").replace(" ","").replace("(","").replace(")","").replace(" ","").replace("-",""))
+
+# first_name = "Sai"
+# last_name = "Ganesh"
+# name = first_name + " " + last_name 
+# print(name)
+
+#f-stings
+# name="Sai"
+# age=25
+# print("My name is " + name + " I am "+ str(age) +" years old")
+# print(f"My name is {name}.I am {age} years old")
+
+# print(f"2+3 = {2+3}")
+# print(f"Name:{"SAI"} Age:{25}")
+# print(f"Name:{{SAI}} Age:{25}")
+
+# Name="Sai Ganesh"
+# print(Name.split(" "))
+
+# print("sai ram "*2)
+# print("-"*40)
+
+# Name="SriSathya BaBa"
+# print(Name[0:3])
+# print(Name[10])
+# print(Name[0:])
+# print(Name[:15])
+# print(Name[:15:1])
+# print(Name[-4:])
+# print(Name[-2])
+
+#CLeaning
+
+# Name = " Sai Ganesh "
+# print(Name)
+# print(Name.lstrip())
+# print(Name.rstrip())
+# print(Name.strip())
+
+# age="#25#"
+# print(age.strip("#"))
+# print(Name.strip(" "))
+# print(len(Name))
+# print(len(Name.strip()))
+# print(len(Name)==len(Name.strip()))
+# print(len(Name)-len(Name.strip()))
+
+# name = "sai GANESH"
+# print(name.lower())
+# print(name.upper())
+
+# search = "Email ".lower().strip()
+# data = " emAil".lower().strip()
+
+# print(search==data)
+
+#Search
+# phone="+49-176-12345"
+# print(phone.startswith("+91"))
+# email="sai@gmail.com"
+# print(email.endswith("gmail.com"))
+# print("@" in email)
+# print(email.find("@"))
+# print(phone[phone.find("-")+1:])
+
+#Validation
+# country="USA"
+# print(country.isalpha())
+# phone="0124597621"
+# print(phone.isnumeric())
+# phone1="0124.597621"
+# print(phone1.isnumeric())
