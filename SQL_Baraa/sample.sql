@@ -117,3 +117,186 @@
 -- left join sales.products as p on o.productid = p.ProductID
 -- left join sales.Employees as e on o.salespersonid = e.EmployeeID;
 
+--Sai Ram
+-- use SalesDB;
+-- SET Operators
+
+-- select * from SALES.customers;
+-- select * from sales.employees;
+
+--Combine the data from employees and customers into one table
+-- select firstname,lastname from SALES.customers
+-- union
+-- select firstname,lastname from sales.employees;
+
+-- select firstname,lastname from SALES.customers
+-- union all
+-- select firstname,lastname from sales.employees;
+
+-- select firstname,lastname from SALES.customers
+-- intersect
+-- select firstname,lastname from sales.employees;
+
+-- select firstname,lastname from SALES.customers
+-- except
+-- select firstname,lastname from sales.employees;
+
+-- Functions
+
+--String Functions
+
+--Manipulation
+--select firstname,country ,concat(firstname,' ' ,country) as name_country from sales.customers ;
+--select lower(firstname) as name,upper(country) as Country from sales.customers;
+--select len(firstname) ,len(trim(firstname)) from sales.customers;
+--select firstname from sales.customers where firstname != trim(firstname);
+--select '123-456-7890' ,replace('123-456-7890' ,'-','');
+
+--select left(firstname,2) from sales.customers;
+--select right(firstname,2) from sales.customers;
+
+--select substring(firstname,1,4) as sub_name from sales.customers
+
+
+--select 3.516,round(3.516,2) as round_2,round(3.516,1) as round_1,round(3.516,0) as round_0 ;
+--select -10 ,abs(-10) ;
+
+-- Date and Time Functions
+
+--select orderid,orderdate,shipdate,creationtime from sales.orders;
+--select orderid,creationtime,'2025-08-20' Hardcoded ,Getdate() today from sales.orders;
+
+--Part Extraction
+
+--select day(shipdate) as Day ,month(shipdate) as Month, year(shipdate) as Year ,shipdate from sales.orders;
+-- select datepart(month,orderdate) from sales.orders;
+-- select datepart(mm,orderdate) from sales.orders;
+-- select datepart(day,orderdate) from sales.orders;
+-- select datepart(year,orderdate) from sales.orders;
+-- select datepart(week,orderdate) from sales.orders;
+-- select datepart(QUARTER,orderdate) from sales.orders;
+-- select datepart(hour,creationtime) from sales.orders;
+-- select datepart(mi,creationtime) from sales.orders;
+
+-- Day Month Year Datepart -> Int , DateName -> String , DateTrunc -> Datetime2 , EOMonth-> Date
+
+--select datename(day,creationtime) ,datename(month,creationtime),datename(year,creationtime)  from sales.orders;
+--select datename(week,creationtime) from sales.orders;
+--select datename(QUARTER,creationtime) from sales.orders;
+--select datename(weekday,creationtime) from sales.orders;
+
+--select datetrunc(hour,creationtime) ,datetrunc(MINUTE,creationtime),datetrunc(day,creationtime)  from sales.orders;
+--select creationtime ,datetrunc(day,creationtime), datetrunc(month,creationtime) ,datetrunc(year,creationtime)  from sales.orders;
+--select creationtime,datetrunc(month,creationtime) as StartOfMonth,eomonth(creationtime) as EndOfMonth from sales.orders;
+
+
+
+
+--Formating
+
+--select creationtime,orderdate,format(orderdate,'dd/MM/yyyy') from sales.orders;
+--select orderdate,format(orderdate,'dd/MM') from sales.orders;
+--select orderdate,format(orderdate,'ddd/MMM/yyyy') from sales.orders;
+--select creationtime,format(creationtime,'dd MMM yyyy HH:mm:ss tt') from sales.orders;
+
+
+--Select convert(int,'124'),convert (varchar,creationtime),convert(date,creationtime) from sales.orders;
+--select cast('124' as int) ,cast(124 as varchar) ,cast(creationtime as date) from sales.orders;
+--
+
+--select orderdate,dateadd(year,2,orderdate) from sales.orders;
+--select orderdate,dateadd(month,-4,orderdate) from sales.orders;
+--select datediff(month,orderdate,shipdate),datediff(day,orderdate,shipdate),datediff(year,orderdate,shipdate) from sales.orders;
+
+--select ISDATE('2025-08-20'),ISDATE('shipdate') from sales.orders;
+--select orderdate,isdate(orderdate) ,case when isdate(orderdate) = 1 then cast(orderdate as date) end neworderdate from 
+--(select '2025-08-20' as orderdate union select '2025-08-21' union  select '2025-06-23' union select '2025-08' )t
+
+--NULL 
+--select * from sales.orders;
+--select orderdate ,isnull(ShipAddress,'N/A')  from sales.orders;
+--select orderdate,coalesce(shipaddress,NULL,'N/A') from sales.orders;
+--select orderdate,coalesce(shipaddress,NULL) from sales.orders;
+--select orderid,sales,quantity,sales/nullif(quantity,0) as price from sales.orders order by price;
+--select * from sales.customers where score is not null;
+
+-- CASE 
+
+--Searched Case
+-- select category ,sum(sales) as total_sales from
+-- (select orderid,sales,
+-- case  
+-- when sales > 50 then 'High'
+-- when sales < 20 then 'Low'
+-- else 'Medium'
+-- end as category
+-- from sales.orders
+-- )t
+-- group by category
+-- order by total_sales desc;
+
+--Simple Case
+-- select employeeid,firstname,lastname,gender,
+-- case gender
+-- when 'F' then 'Female'
+-- when 'M' then 'Male'
+-- else 'not available'
+-- end as Gen
+-- from sales.employees;
+
+-- select customerid,lastname,score,
+-- case 
+-- when score is null then 0
+-- else score 
+-- end scoreclean,
+-- avg(case when score is null then 0
+-- else score 
+-- end) over () avgcustomerclean,
+-- avg(score) over() avgcusomer
+-- from sales.customers;
+
+-- Aggregate Functions
+
+-- select customerid ,count(*) as count,sum(sales) as sum ,avg(sales) as avg,
+-- max(sales) as max,min(sales) as min from sales.orders  group by customerid;
+
+-- Aggregate Window Functions
+
+-- select 
+-- orderid,orderdate,
+-- productid,
+-- sum(sales) over (partition by productid) TotalSales
+-- from sales.orders
+--group by Productid;
+
+-- select 
+-- orderid,
+-- productid,
+-- sales,
+-- sum(sales) over (partition by productid order by sales desc) 
+-- TotalSalesbyproduc
+-- ,sum(sales) over () totalsales
+-- ,sum(sales) over (partition by productid,orderstatus) 
+-- from sales.orders
+-- --group by Productid
+-- ;
+
+-- select 
+-- orderid,
+-- productid,
+-- sales,
+-- rank () over (order by sales desc) as rank,
+-- dense_rank () over (order by sales desc) as denserank
+-- ,rank() over(partition by productid order by sales desc) as rankp
+-- from sales.orders;
+
+-- select orderid,orderdate,orderstatus,sales,
+-- sum(sales) over(partition by orderstatus order by orderdate
+-- rows between unbounded preceding and current row) TotalSales -- default frame
+-- from sales.orders; 
+
+-- select customerid,
+-- sum(sales) as TotalSales,
+-- rank() over(order by sum(sales) desc) RankC
+-- from sales.orders
+-- group by customerid; 
