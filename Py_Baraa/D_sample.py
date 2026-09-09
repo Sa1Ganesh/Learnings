@@ -235,5 +235,8 @@
 # z=70
 # print(isinstance(x,int))
 # print(isinstance(z,float))
-import random
-print(random.randint(1,100)%2==0)
+
+# import random
+# print(random.randint(1,100)%2==0)
+
+print("Sai Ram")
