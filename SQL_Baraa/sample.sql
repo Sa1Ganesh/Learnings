@@ -300,3 +300,146 @@
 -- rank() over(order by sum(sales) desc) RankC
 -- from sales.orders
 -- group by customerid; 
+
+-- select 'Sai Ram'
+
+--Aggregate window functions
+
+--count(all_data_type) over()  --counts non Null value in the column
+
+--select * from sales.orders;
+--select count(*),count(shipaddress)  from sales.orders;
+-- select orderid,orderdate,customerid,count(*) over() totalorders
+-- ,count(*) over (partition by customerid order by customerid) customers
+-- ,count(shipaddress) over (partition by customerid ) sa
+-- from sales.orders;
+
+-- select * from 
+-- (
+-- select
+-- orderid,
+-- count(1) over() totalorders,
+-- count(*) over (partition by orderid order by orderid) customers
+-- from sales.OrdersArchive)t
+-- where customers>1
+-- ;
+
+--SUM(NUMBER) OVER(parition by )	
+-- select orderid,productid,sales,
+-- sum(sales) over ()  TotalSales,
+-- sum(sales) over (partition by productid) ProductSales,
+-- sum(sales) over (partition by productid order by orderid) ProducSales
+-- from Sales.orders;
+
+-- select orderid,productid,sales,
+-- sum(sales) over ()  TotalSales,
+-- round(cast(sales as float)/sum(sales) over () * 100 ,2) cent
+-- from Sales.orders;
+
+
+-- Avg(number) over()
+-- select customerid,lastname,score,
+-- avg(score) over ()  avgSales,
+-- avg(score) over (partition by customerid) prdavg,
+-- avg(coalesce(score,0)) over (partition by customerid) prdavg
+-- from Sales.Customers;
+
+-- Min / Max(number) over() 
+-- select orderid,productid,sales,
+-- Min(sales) over (partition by productid) as Min,
+-- Max(sales) over (partition by productid) as Max
+-- from sales.orders;
+
+-- select orderid,sales from (select orderid,sales,
+-- Min(sales) over (partition by productid) as Min,
+-- Max(sales) over (partition by productid) as Max
+-- from sales.orders)t where sales = Max;
+
+-- Running Totals
+--Sum (Sales) Over (order by month) 
+--default is (rows between unbounded preceding and current row)
+
+-- select productid,orderdate,sales,
+-- avg(sales) over (partition by productid) as AvgSales,
+-- avg(sales) over (partition by productid order by productid ) as MAvgSales,
+-- avg(sales) over (partition by productid order by orderdate) as MOVAvgSales
+-- from sales.orders
+
+
+-- Rolling Totals
+--Sum (Sales) Over (order by month rows between 2 preceding and current row) 
+-- select productid,orderdate,sales,
+-- sum(sales) over (partition by productid) as AvgSales,
+-- sum(sales) over (partition by productid order by orderdate) as MovAvgSales,
+-- sum(sales) over (partition by productid order by orderdate 
+-- rows between 2 preceding and current row) as ROlAvgSales
+-- from sales.orders
+
+-- Value Window Functions
+--RANK () over ( order by ) -- ranks with gaps
+-- select orderid,sales,
+-- rank() over(order by sales desc) as ranks,
+-- row_number() over(order by sales desc) as rnum
+-- from sales.orders;
+
+
+-- Row_Number() over(order by ) -- unique row number
+-- select orderid,sales,
+-- row_number() over(order by sales desc)
+-- from sales.orders;
+
+--DenseRANK () over ( order by ) -- ranks without gaps
+-- select orderid,sales,
+-- row_number() over(order by sales desc) as rnum,
+-- rank() over(order by sales desc) as ranks,
+-- dense_rank() over(order by sales desc) as dr
+-- from sales.orders;
+
+-- For duplicates
+-- select row_number() over(partition by orderid order by creationtime) as rnum,*
+-- from sales.OrdersArchive;
+
+--NTile (number ) over (order by )
+-- select orderid,sales,
+-- ntile (2) over (order by sales desc) 
+-- ,ntile (3) over (order by sales desc) 
+-- from sales.OrdersArchive;
+
+-- select *,case buckets
+-- when 1 then 'High'
+-- when 2 then 'Medium'
+-- when 3 then 'Low'
+-- else 'n'
+-- end as  'groups' from
+-- (
+-- select orderid,sales
+-- ,ntile (3) over (order by sales desc) buckets
+-- from sales.Orders
+-- ) t ;
+
+--Percentage
+-- Cume_Dist ( ) over (order by ) p/r
+-- select product,price,
+-- Cume_Dist () over (order by price desc) distrank
+-- from sales.products;
+
+-- Percent_Rank () over (order by ) p-1/r-1
+-- select product,price,
+-- percent_rank () over (order by price desc) distrank
+-- from sales.products;
+
+-- Value Window Functions
+--lead,lag,
+-- Lead(anydatatype,offset,default	) over (prder by )
+
+-- select orderid,sales,orderdate
+-- ,LEAD (sales,1,0) over (order by orderdate) as lead
+-- ,LAG (sales,1,0) over (order by orderdate) as lag
+-- from sales.orders;
+
+
+-- Value Window Functions
+--First_Value () over (order by) 
+--default rows between unbounded preceding and current row
+
+--Last_value () over (order by) 
