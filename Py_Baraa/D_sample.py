@@ -239,4 +239,152 @@
 # import random
 # print(random.randint(1,100)%2==0)
 
-print("Sai Ram")
+# print("Sai Ram")
+
+#Boolean
+# print(True)
+# print(False)
+# print(type(True))
+# print(bool(123))
+# print(bool('sairam'))
+# print(bool())
+# print(bool(0))
+# print(bool(1))
+# print(bool(""))
+# print(bool(None))
+
+# email=""
+# phone="125"
+# username=""
+# age=25
+# print(any([email,phone,username]))
+# print(all([username,phone,age]))
+
+# print(10==10)
+# print(10!=5)
+# print(7>3)
+# print(5<=2)
+# print(1<4<6)
+
+# print(2<5 and 3<5)
+# print(1<2 or 5<3)
+# print(not 2<5)
+# print(not False)
+# name=""
+# print(not name)
+# print(5==5 or 8>5 and 6<4)
+# print((5==5 or 8>5) and 6<4)
+# password='124'
+# print(len(password)>=8 and "" not in password)
+
+#Membership 
+# Name="Sai Ganesh"
+# print("s" in Name)
+# print("a" not in "python")
+
+#Identity
+# a=124
+# b=124
+# c=[1,2,3]
+# d=[1,2,3]
+# e==c
+# print(a is b)
+# print(c==d)
+# print(c is d)
+# print(c==e)
+# print(c is e)
+
+#Conditional Statements
+
+# score= 100
+# if score >= 90:
+#     print("A")
+# print("Done")    
+
+# score= 55
+# if score >= 90:
+#     print("A")
+# else:
+#     print("B")
+# print("Done")    
+
+# score= 55
+# if score >= 90:
+#     print("A")
+# elif score >=80:
+#     print("B")  
+# elif score >=60:
+#     print("c")
+# else:
+#     print("D")
+# print("Done")    
+
+
+#Nested If
+
+# score=55
+# submitted_project = True
+# if score >= 90:
+#     if submitted_project:
+#         print("A+")
+#     else:    
+#         print("A")
+# elif score >=80:
+#     print("B")  
+# elif score >=60 or submitted_project:
+#     print("c")
+# else:
+#     print("D")
+# print("Done")    
+
+#Inline If statements
+# score=55
+# grade = "A" if score >=90 else "B" if score >=80 else "F"
+# print(grade)
+
+#match Case
+
+
+#Loops
+# for i in (1,2,3,4,5):
+#     print(f"Round:{i}",i)
+
+# items = " python"
+# for item in items:
+#     print(f"Word:{item}")
+
+# for i in range(5):
+#     print(i)
+# for i in range(1,11):
+#     print(i)
+# for i in range(1,11,2):
+#     print(i)    
+
+# files=[' Report.csv ','DATA.csv ',' final.TXT']
+# for file in files:
+#     file = file.strip().lower().replace('.txt','.csv')
+#     print(f'cleaning {file}')
+
+# for i in range(1,11):
+#     print(f" 7 X {i} = {7 * i}" )
+
+#Break(Stop),Continue(Skip),Pass
+
+# for i in (1,2,3,'',5):
+#     if i =='':
+#         print("Empty")
+#         break
+#     print(f"Round:{i}")
+
+
+
+# for i in (1,2,3,'',5):
+#     if i =='':
+#         print("Empty")
+#         continue
+#     print(f"Round:{i}")
+
+for i in (1,2,3,'',5):
+    if i =='':
+        pass
+    print(f"Round:{i}")
