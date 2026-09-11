@@ -384,7 +384,223 @@
 #         continue
 #     print(f"Round:{i}")
 
-for i in (1,2,3,'',5):
-    if i =='':
-        pass
-    print(f"Round:{i}")
+# for i in (1,2,3,'',5):
+#     if i =='':
+#         pass
+#     print(f"Round:{i}")
+
+#For If ELse 
+# items=[1,7,3,5]
+# for i in items:
+#     if i % 2 == 0:
+#         print( "Even Found :",i)
+#         break
+# else:
+#     print("All numbers are odd")    
+
+#Nested Loops
+# for x in range(3): #outer loop
+#     for y in range(2): #inner loop
+#         print(f"({x}, {y})")
+
+#While Loop
+# i=1
+# while i<5:
+#     print(i)
+#     i+=1
+
+# answer=""
+# while answer != "yes":
+#     answer=input("Do you agree ? (yes/no):")
+# print("Thank You")    
+
+
+#Data Structures
+
+#List
+#create Lists
+# empty=[]
+# print(empty)
+# print(type(empty))
+
+# name="Sai Ganesh"
+# print(list(name))
+
+# print(list(range(5)))
+
+# matrix = [['a','b','c'],['d','e','f']]
+# print(matrix)
+# print(type(matrix))
+
+# mixed_matrix = [['a','b'],
+#                 [1,2,4],
+#                 [True]]
+# print(mixed_matrix)
+
+#Access List
+
+# lst = [1,2,4,'a','b']
+# print(lst[0])
+# print(lst[1:5])
+# print(lst[-1])
+# print(lst[-4:-1])
+
+# matrix = [['a','b','c'],
+#           [1,2,4],
+#           ['d','e','f']]
+# print(matrix)
+# print(matrix[1])
+# print(matrix[1][2])
+# print(matrix[0:2][0:1])
+
+#Unpacking
+
+# person = ['Maria',29,'Data Engineer','India']
+# name = person[0]
+# age = person[1]
+# print(name)
+# name,age,role,country = person
+# print(role)
+# name,*details,country = person
+# print(name)
+# print(details)
+# print(country)
+
+# name,*details=person
+# print(name)
+# print(details)
+
+# name,_,role,_ = person
+# print(name)
+# print(role)
+
+# numbers=[1,5,2,4,3,5,2]
+# print("Max:",max(numbers))
+# print("Min:",min(numbers))
+# print("Len:",len(numbers))
+# print("Sum:",sum(numbers))
+
+# print("all:",all(numbers))
+# print("all:",all([1,0,2]))
+# print("any:",any([1,0,2])
+
+# print("count:",numbers.count(5))
+# print("index:",numbers.index(2))
+# print( 5 in numbers)
+# print(not 2 in numbers)
+
+
+# list1 = [1,2,3]
+# list2 = [1,2,3]
+# print(list1 == list2)
+# print(list1 is list2)
+
+# num = [1,2,3,4,'a','b',6]
+# print(num)
+# num.append('c')
+# print(num)
+# num.insert(2,'v')
+# print(num)
+# num.remove('b')
+# print(num)
+# num.clear()
+# print(num)
+# num.pop()
+# print(num)
+# num[1]=5
+# print(num)
+
+#Sort
+# alp = ['a','b','c','e','d']
+# desc=alp.sort(reverse = True)
+# print(alp)
+# print(sorted(alp))
+# print(list(reversed(alp)))
+
+#copy
+# org = [1,2,3]
+# cp = org
+# print(org)
+# print(cp)
+# cp.append(4)
+# cp=org.copy()
+# print(cp)
+# print(org)
+# cp.append(5)
+# print(cp)
+# print(org)
+
+#deepcopy() from copy module
+
+# num = [1,2,3]
+# let = ['a','b','c']
+# num1 = [2,3,4]
+# # com = num + let
+# # print(com)
+
+# com1 = num + num1
+# print(com1)
+
+# com2 = [num,num1]
+# print(com2)
+
+# num1.extend(num)
+# print(num1)
+
+#Zip
+# names=['Sai','Ganesh','Sai Ram']
+# id=[101,102,103]
+# print(list(zip(id,names)))
+
+#Iterators
+
+# letters = ['a','b','c']
+# for i in letters:
+#     print(i.upper())
+
+# letters = ['a','b','c']
+# print(list(enumerate(letters,start=1)))
+# for index,value in enumerate (letters):
+#     print(index,value)
+
+#reveresed
+#zip
+#map
+#filter
+
+#Lambda
+# mul = lambda x,y : x + y
+# print(mul(2,4))
+
+#List Comprehension
+
+#Tuples
+
+# numbers = (1,2,4,2)
+# print(numbers)
+# print(numbers[1])
+
+# Sets
+
+# my_set = {1,2,3,5,2} #unique , unordered ,mutable
+# print(my_set)
+#add, update, discard
+#union (|), intersection (&), difference,issubset, issuperset ,isdisjoint
+
+#Dictionaries
+
+my_dict = { 1:'a', 2:'b'}
+# print(my_dict[1])
+# print(my_dict.get(2))
+# print(1 in my_dict)
+# print(my_dict.keys())
+# print(my_dict.values())
+# print(my_dict.items())
+# print(my_dict)
+
+# for d in my_dict:
+#     print(d,my_dict[d])
+
+# for key, value in my_dict.items():
+#     print(key,value)
+
