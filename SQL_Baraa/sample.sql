@@ -443,3 +443,250 @@
 --default rows between unbounded preceding and current row
 
 --Last_value () over (order by) 
+
+
+--Subqueries
+
+-- select avg(sales) from sales.orders;  -- scalar query
+-- select customerid from sales.orders;  -- row query
+-- select customerid ,orderdate from sales.orders;  -- table query
+
+--From Clause
+
+-- select *
+-- from 
+-- (
+-- select productid,price,avg(price) over () AvgPrice from sales.products
+-- ) as t
+-- where price > avgprice;
+
+-- select *,Rank() over (order by Totalsales desc) as rank from
+-- (select customerid,sum(sales) Totalsales
+-- from sales.orders group by customerid) t; 
+
+-- select productid,product,price, 
+-- (select count(orderid) from sales.orders) as totalorders
+-- from sales.products;
+
+-- join subquery
+
+-- select s.*,t.TotalOrders from sales.customers s left join
+-- (select customerid,count(*) as TotalOrders from sales.orders
+-- group by customerid) t on s.customerid = t.customerid ;
+
+--Where Clause
+
+-- select * 
+-- from sales.products
+-- where price > (select avg(price) from sales.products);
+
+-- select * 
+-- from sales.orders
+-- where customerid in 
+-- (select customerid from sales.customers where country = 'Germany');
+
+--Corelated Subqueries
+-- select *,
+-- (select count(*) from sales.orders o
+-- where o.customerid=c.customerid) TotalSales
+-- from sales.customers c;
+
+
+--Corelated Subqueries
+--Exists
+
+-- select * from sales.orders o
+-- where exists (
+-- select * from sales.customers c where country = 'Germany' 
+-- and o.customerid = c.customerid);
+
+
+-- select * from sales.orders o
+-- where exists (
+-- select 1 from sales.customers c where country = 'Germany' 
+-- and o.customerid = c.customerid);
+
+-- select * from sales.orders 
+-- where customerid  in (
+-- select customerid from sales.customers 
+-- where country = 'Germany' 
+-- );
+
+
+-- CTEs
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales from Sales.orders 
+-- group by customerid
+-- )
+-- select c.customerid,c.firstname,c.lastname ,ct.TotalSales
+-- from sales.customers c left join cte_t ct 
+-- on c.customerid = ct.customerid ;
+
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales from Sales.orders 
+-- group by customerid
+-- )
+-- select c.customerid,c.firstname,c.lastname ,ct.TotalSales
+-- from sales.customers c left join cte_t ct 
+-- on c.customerid = ct.customerid
+-- order by firstname;
+
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales 
+-- from Sales.orders 
+-- group by customerid
+-- )
+-- ,ct_lsorder as
+-- (
+-- select customerid, max(orderdate) as last_order 
+-- from sales.orders  
+-- group by customerid
+-- )
+-- select c.customerid,c.firstname,c.lastname ,
+-- ct.TotalSales,co.last_order 
+-- from sales.customers c left join cte_t ct on c.customerid = ct.customerid 
+-- left join ct_lsorder co on c.customerid  = co.customerid ;
+
+--Nested CTEs
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales 
+-- from Sales.orders 
+-- group by customerid
+-- ),
+-- ct_lsorder as
+-- (
+-- select customerid, max(orderdate) as last_order 
+-- from sales.orders  
+-- group by customerid
+-- ),
+-- ct_rank as
+-- (
+-- select customerid,totalsales,
+-- rank() over (order by totalsales desc) as crank
+-- from cte_t
+-- )
+-- select * from ct_rank;
+
+
+
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales 
+-- from Sales.orders 
+-- group by customerid
+-- ),
+-- ct_lsorder as
+-- (
+-- select customerid, max(orderdate) as last_order 
+-- from sales.orders  
+-- group by customerid
+-- ),
+-- ct_rank as
+-- (
+-- select customerid,totalsales,
+-- rank() over (order by totalsales desc) as crank
+-- from cte_t
+-- )
+
+-- select c.customerid,c.firstname,c.lastname ,
+-- ct.TotalSales,co.last_order ,crank
+-- from sales.customers c left join cte_t ct on c.customerid = ct.customerid 
+-- left join ct_lsorder co on c.customerid  = co.customerid 
+-- left join ct_rank ck on c.customerid  = ck.customerid ;
+
+
+
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales 
+-- from Sales.orders 
+-- group by customerid
+-- ),
+-- ct_lsorder as
+-- (
+-- select customerid, max(orderdate) as last_order 
+-- from sales.orders  
+-- group by customerid
+-- ),
+-- ct_rank as
+-- (
+-- select customerid,totalsales,
+-- rank() over (order by totalsales desc) as crank
+-- from cte_t
+-- ),
+-- cus_seg as
+-- (
+-- select customerid,
+-- case 
+-- when totalsales > 100 then 'high'
+-- when totalsales > 80 then 'medium'
+-- when totalsales >50 then 'low'
+-- end as cus_s
+-- from cte_t
+-- )
+--Main query
+-- select c.customerid,c.firstname,c.lastname ,
+-- ct.TotalSales,co.last_order ,crank,cus_s
+-- from sales.customers c left join cte_t ct on c.customerid = ct.customerid 
+-- left join ct_lsorder co on c.customerid  = co.customerid 
+-- left join ct_rank ck on c.customerid  = ck.customerid 
+-- left join cus_seg cs on c.customerid  = cs.customerid 
+-- ORDER BY CASE WHEN crank IS NULL THEN 1 ELSE 0 END, crank;
+
+
+-- with cte_t as 
+-- (
+-- select customerid ,sum(sales) as TotalSales 
+-- from Sales.orders 
+-- group by customerid
+-- ),
+-- ct_lsorder as
+-- (
+-- select customerid, max(orderdate) as last_order 
+-- from sales.orders  
+-- group by customerid
+-- ),
+-- ct_rank as
+-- (
+-- select customerid,totalsales,
+-- rank() over (order by totalsales desc) as crank
+-- from cte_t
+-- ),
+-- cus_seg as
+-- (
+-- select customerid,
+-- case 
+-- when totalsales > 100 then 'high'
+-- when totalsales > 80 then 'medium'
+-- when totalsales >50 then 'low'
+-- end as cus_s
+-- from cte_t
+-- )
+-- --Main query
+-- select c.customerid,c.firstname,c.lastname ,
+-- ct.TotalSales,co.last_order ,crank,cus_s
+-- from sales.customers c left join cte_t ct on c.customerid = ct.customerid 
+-- left join ct_lsorder co on c.customerid  = co.customerid 
+-- left join ct_rank ck on c.customerid  = ck.customerid 
+-- left join cus_seg cs on c.customerid  = cs.customerid 
+-- ORDER BY CASE WHEN crank IS NULL THEN 1 ELSE 0 END, crank;
+
+--Recursive CTEs
+-- with emp_h as
+-- (select employeeid,firstname,managerid
+-- ,1 as level  
+-- from sales.employees where managerid is null
+
+-- union all
+-- select  e.employeeid,e.firstname,e.managerid,
+-- level+1  
+-- from sales.employees as e
+-- inner join emp_h  h on e.managerid = h.employeeid
+
+-- )
+-- select * from emp_h;
+
