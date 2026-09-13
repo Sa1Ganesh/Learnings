@@ -690,3 +690,55 @@
 -- )
 -- select * from emp_h;
 
+--Views
+
+-- with mon_sum as 
+-- (
+-- select 
+-- datetrunc(month,orderdate) ordermonth,
+-- sum(sales) totalsales,
+-- count(orderid) totalorders,
+-- sum(quantity) totalq
+-- from sales.orders
+-- group by datetrunc(month,orderdate)
+-- )
+-- select ordermonth,totalsales,sum(totalsales) over (order by ordermonth) as run_tot from mon_sum ;
+
+--T-SQL
+
+-- create view sales.v_sum as 
+-- select 
+-- datetrunc(month,orderdate) ordermonth,
+-- sum(sales) totalsales,
+-- count(orderid) totalorders,
+-- sum(quantity) totalq
+-- from sales.orders
+-- group by datetrunc(month,orderdate);
+
+-- select * from sales.v_sum;
+-- drop view sales.v_sum;
+
+-- CTAS
+
+-- create table name as (select from where ) -- Oracle
+
+-- select 
+-- datename(month,orderdate) ordermonth,
+-- count(orderid) totalorders
+-- into sales.monthly_orders
+-- from sales.orders
+-- group by datename(month,orderdate);
+
+-- select * from sales.monthly_orders;
+-- drop table monthly_orders;
+
+--T-SQL
+
+-- Temp Tables
+
+-- select * into #orders from sales.orders
+
+-- Index
+
+-- Create  [Clustered | NonClustered ] Index index_name on Table_name (col1,col2)
+
