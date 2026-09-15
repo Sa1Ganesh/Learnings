@@ -742,3 +742,86 @@
 
 -- Create  [Clustered | NonClustered ] Index index_name on Table_name (col1,col2)
 
+--select * from sys.tables;
+-- All indexes in the database
+-- SELECT * FROM sys.indexes;
+
+-- Index usage statistics (seeks, scans, lookups, updates)
+-- SELECT * FROM sys.dm_db_index_usage_stats;
+
+-- Physical stats (fragmentation, page counts)
+-- SELECT * FROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED');
+
+-- Columns involved in statistics
+-- SELECT * FROM sys.stats_columns;
+
+-- Statistics metadata
+-- SELECT * FROM sys.stats;
+
+-- SELECT * FROM sys.stats s join sys.tables t on s.object_id = t.object_id 
+-- cross apply sys.dm_db_stats_properties (s.object_id,s.stats_id);
+
+--TIPS for Better Peformance
+
+-- 1- select only what you need , to avoid fetching unnecessary data
+-- 2 - avoid unnecessary distinct and order by clause 
+-- 3- for exploration,.limit the rows,
+--  4- create a non cluster index on a frequently used column with where clause.
+-- 5- avoid applying function to column in WHERE clause 
+-- 6- avoid leading wildcard as they prevent index usage
+-- 7- use IN instead of multiple OR 
+-- 8- understand the speed of joins and use of inner join when possible because processing is fast in inner join 
+-- 9- use explicit join (ANSI join) instead of implicit join (non ANSI Join ) 
+-- 10- make sure to index the column used in ON clauses.
+-- 11- filter before joining (big tables) try isolate the preparation step in a CTE or subquery.
+-- 12- aggregate before joining (big tables) correlated queries are inefficient because sql executes aggregation for every row.
+-- 13- use union instead of OR in joins .
+-- 14- check for nested loops and use sql hints for big tables use hadh tables ( hash joins ) 
+-- 15- use UNION all instead of using UNION , duplicate are accepted 
+-- 16- use UNION all with distinct instead of union, duplicate are not acceptable.
+-- 17- use column store index for aggregation on large tables.
+-- 18- pre aggregate data and store it in new table for reporting 
+-- 19- the IN operator process and read all rows . prefer to go with join if performance equals using exists .
+-- 20- avoid redundant logic in your query.
+-- 21- avoid Data types like varchar and text if possible, Even text data type is worse than varchar.
+-- 22- avoid using (MAX) unnecessarily large length in data types .
+-- 23- use the NOT NULL constraint where applicable.
+-- 24- ensure all your tables have a clustered primary key .
+-- 25- create a non clustered index for foreign keys if they are used frequently .
+-- 26- avoid over indexing 
+-- 27- drop unused index.
+-- 28- update Statics weekly 
+-- 29- rebuild and reorganise indexes weekly 
+-- 30- partition large table (facts) to improve performance then next apply a column store index for best results.
+
+
+
+
+--Stored Procedure
+-- create procedure GetCustomerSummmary as
+-- begin
+-- select count(*) totalCustomers,
+-- avg(score) AvgScore from sales.customers 
+-- where country = 'USA'
+
+-- end;
+
+-- exec GetCustomerSummmary 
+-- drop procedure  GetCustomerSummmary
+
+--Parameters
+
+-- create procedure GetCustomerSummmary @country_name VARCHAR(50)
+-- as
+-- begin
+-- select count(*) totalCustomers,
+-- avg(score) AvgScore from sales.customers 
+-- where country = @country_name
+-- end;
+
+-- exec GetCustomerSummmary @country_name= 'USA'
+
+-- drop procedure GetCustomerSummmary ;
+
+--Triggers
+
