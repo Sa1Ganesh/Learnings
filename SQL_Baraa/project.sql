@@ -14,7 +14,6 @@
 
 -- Bronze Layer
 
--- Bronze Layer
 
 -- if object_id('bronze.crm_cust_info','U') is not null 
 -- drop table bronze.crm_cust_info;
@@ -172,7 +171,10 @@
 --  select count(*) from bronze.erp_px_cat_g1v2;
 
 
---Stored procedure
+
+
+
+--Stored procedure for Bronze Layer
 
 -- create or alter procedure bronze.load_bronze as 
 -- begin
@@ -343,8 +345,1247 @@
 
 -- end;
 
+
+
+
+
+
+
 -- exec bronze.load_bronze;
 --drop procedure bronze.load_bronze;
 
 
+--SQL Queries for Silver Layer
 
+
+-- use datawarehouse;
+
+-- select top 100 * from bronze.crm_sales_details;
+-- select top 100 * from bronze.crm_cust_info;
+-- select top 100 * from bronze.crm_prd_info;
+
+
+-- select top 100 * from bronze.crm_cust_info;
+-- select top 100 * from bronze.erp_cust_az12;
+-- select top 100 * from bronze.erp_loc_a101;
+
+-- select top 100 * from bronze.crm_prd_info;
+-- select top 100 * from bronze.erp_px_cat_g1v2;
+
+
+
+-- if object_id('silver.crm_cust_info','U') is not null 
+-- drop table silver.crm_cust_info;
+
+-- create table silver.crm_cust_info(
+-- cst_id int,
+-- cst_key Nvarchar(50),
+-- cst_firstname Nvarchar(50),
+-- cst_lastname Nvarchar(50),
+-- cst_material_status Nvarchar(50),
+-- cst_gender Nvarchar(50),
+-- cst_create_date Date,
+-- dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- if object_id('silver.crm_prd_info','U') is not null 
+-- drop table silver.crm_prd_info;
+
+-- create table silver.crm_prd_info (
+-- prd_id int,
+-- prd_key nvarchar(50),
+-- prd_nm nvarchar(50),
+-- prd_cost int,
+-- prd_line nvarchar(50),
+-- prd_start_dt datetime,
+-- prd_end_dt datetime,
+-- dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- if object_id('silver.crm_sales_details','U') is not null 
+--   drop table silver.crm_sales_details;
+
+--   create table silver.crm_sales_details (
+--   sls_ord_num Nvarchar(50),
+--   sls_prd_key Nvarchar(50),
+--   sls_cust_id int,
+--   sls_order_dt int,
+--   sls_ship_dt int,
+--   sls_due_dt int,
+--   sls_sales int,
+--   sls_quantity int,
+--   sls_price int,
+--   dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- if object_id('silver.erp_loc_a101','U') is not null 
+-- drop table silver.erp_loc_a101
+
+-- create table silver.erp_loc_a101 (
+-- cid nvarchar(50),
+-- cntry nvarchar(50),
+-- dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- if object_id('silver.erp_cust_az12','U') is not null 
+-- drop table silver.erp_cust_az12;
+
+-- create table silver.erp_cust_az12(
+-- cid nvarchar(50),
+-- bdate date,
+-- gen nvarchar(10),
+-- dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- if object_id('silver.erp_px_cat_g1v2','U') is not null 
+-- drop table silver.erp_px_cat_g1v2;
+
+-- create table silver.erp_px_cat_g1v2 (
+-- id nvarchar(50),
+-- cat nvarchar(50),
+-- subcat nvarchar(50),
+-- maintenance nvarchar(50),
+-- dwh_create_date Datetime2 default getdate()
+--);
+
+
+-- Table silver.crm_cust_info
+
+-- Check for Nulls and Duplicates in primary key for bronze layer
+
+-- select cst_id ,count(*) from bronze.crm_cust_info
+-- group by cst_id having count(*)>1 or cst_id is null;
+
+-- select * from (
+-- select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+-- from bronze.crm_cust_info 
+-- )t where flag_last != 1;
+
+
+-- Check for Unwanted Spaces
+
+-- select cst_firstname from bronze.crm_cust_info 
+-- where cst_firstname != trim(cst_firstname) ;
+
+-- select cst_lastname from bronze.crm_cust_info 
+-- where cst_lastname != trim(cst_lastname) ;
+
+-- select cst_gender from bronze.crm_cust_info 
+-- where cst_gender  != trim(cst_gender) ;
+
+
+-- select 
+-- cst_id,
+-- cst_key,
+-- trim(cst_firstname) as cst_firstname,
+-- trim(cst_lastname) as cst_lastname,
+-- cst_material_status,
+-- cst_gender,
+-- cst_create_date
+-- from (
+-- select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+-- from bronze.crm_cust_info 
+-- )t where flag_last = 1;
+
+
+-- -- Data Standardization and consistency
+-- select distinct cst_gender from bronze.crm_cust_info;
+-- select distinct cst_material_status from bronze.crm_cust_info;
+
+
+-- select 
+-- cst_id,
+-- cst_key,
+-- trim(cst_firstname) as cst_firstname,
+-- trim(cst_lastname) as cst_lastname,
+-- cst_material_status,
+-- case when upper(trim(cst_material_status)) = 'M' then 'Married'
+-- when upper(trim(cst_material_status)) = 'S' then 'Single'
+-- else 'n/a' end  cst_material_status,
+-- cst_gender,
+-- case when upper(trim(cst_gender)) = 'M' then 'Male'
+-- when upper(trim(cst_gender)) = 'F' then 'Female'
+-- else 'n/a' end  cst_gender,
+-- cst_create_date
+-- from (
+-- select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+-- from bronze.crm_cust_info 
+-- )t where flag_last = 1;
+
+-- use DataWarehouse;
+-- select * from silver.crm_cust_info ;
+-- -- truncate table silver.crm_cust_info ;
+
+--   insert into silver.crm_cust_info
+--   (
+--   cst_id,
+--   cst_key,    
+--   cst_firstname,
+--   cst_lastname,
+--   cst_material_status,
+--   cst_gender,
+--   cst_create_date
+--   )
+--   select 
+--   cst_id,
+--   cst_key,
+--   trim(cst_firstname) as cst_firstname,
+--   trim(cst_lastname) as cst_lastname,
+--   case when upper(trim(cst_material_status)) = 'M' then 'Married'
+--   when upper(trim(cst_material_status)) = 'S' then 'Single'
+--   else 'n/a' end  cst_material_status,
+--   case when upper(trim(cst_gender)) = 'M' then 'Male'
+--   when upper(trim(cst_gender)) = 'F' then 'Female'
+--   else 'n/a' end as cst_gender,
+--   cst_create_date
+--   from (
+--   select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+--   from bronze.crm_cust_info where cst_id is not null
+--   )t where flag_last = 1;
+
+--   select count(*) from silver.crm_cust_info;
+
+
+-- Check for Nulls and Duplicates in primary key for Silver Layer
+
+-- select cst_id ,count(*) from silver.crm_cust_info
+-- group by cst_id having count(*)>1 or cst_id is null;
+
+-- select * from (
+-- select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+-- from silver.crm_cust_info 
+-- )t where flag_last != 1;
+
+
+-- Check for Unwanted Spaces
+
+-- select cst_firstname from silver.crm_cust_info 
+-- where cst_firstname != trim(cst_firstname) ;
+
+-- select cst_lastname from silver.crm_cust_info 
+-- where cst_lastname != trim(cst_lastname) ;
+
+-- select cst_gender from silver.crm_cust_info 
+-- where cst_gender  != trim(cst_gender) ;
+
+-- select distinct  cst_material_status from  silver.crm_cust_info ;
+-- select distinct  cst_gender from  silver.crm_cust_info ;
+
+
+--Table silver.crm_prd_info
+
+-- select * from bronze.crm_prd_info;
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- from bronze.crm_prd_info;
+
+
+-- select prd_id ,count(*) from bronze.crm_prd_info
+-- group by prd_id having count(*)>1 or prd_id is null;
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- from bronze.crm_prd_info;
+
+-- select distinct id from bronze.erp_px_cat_g1v2;
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- from bronze.crm_prd_info
+-- where substring(prd_key,7,len(prd_key))  not in
+-- (select  sls_prd_key from bronze.crm_sales_details);
+
+-- select sls_prd_key from bronze.crm_sales_details;
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- from bronze.crm_prd_info
+-- where substring(prd_key,7,len(prd_key))  in
+-- (select sls_prd_key from bronze.crm_sales_details);
+
+
+
+-- select prd_nm from bronze.crm_prd_info where prd_nm != trim(prd_nm) ;
+-- select prd_cost from bronze.crm_prd_info where prd_cost < 0 or prd_cost is null;
+-- select distinct prd_line from bronze.crm_prd_info ;
+--Check for invalid dates in prd_start_dt and prd_end_dt columns
+-- select * from bronze.crm_prd_info where prd_end_dt < prd_start_dt;
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- isnull(prd_cost,0) as prd_cost,
+-- case upper(trim(prd_line)) 
+-- when 'M' then 'Mountain'
+-- when 'R' then 'Road'
+-- when 'T' then 'Touring'
+-- when 'S' then 'Other Sales'
+-- else 'n/a' end as prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- from bronze.crm_prd_info;
+
+
+-- select 
+-- prd_id,
+-- prd_key,
+-- prd_nm,
+-- prd_start_dt,
+-- prd_end_dt,
+-- lead(prd_start_dt) over (partition by prd_key order by prd_start_dt) -1 as prd_end_dt_test,
+-- from bronze.crm_prd_info
+-- where prd_key in ('AC-HE-HL-U509-R','AC-HE-HL-U509');
+
+-- select 
+-- prd_id,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- isnull(prd_cost,0) as prd_cost,
+-- case upper(trim(prd_line)) 
+-- when 'M' then 'Mountain'
+-- when 'R' then 'Road'
+-- when 'T' then 'Touring'
+-- when 'S' then 'Other Sales'
+-- else 'n/a' end as prd_line,
+-- cast (prd_start_dt as date) as prd_start_dt,
+-- cast (lead(prd_start_dt) over (partition by prd_key order by prd_start_dt) -1 as date) as prd_end_dt_test
+-- from bronze.crm_prd_info;
+
+--Update the DDL
+
+-- if object_id('silver.crm_prd_info','U') is not null 
+-- drop table silver.crm_prd_info;
+
+-- create table silver.crm_prd_info (
+-- prd_id int,
+-- cat_id nvarchar(50),
+-- prd_key nvarchar(50),
+-- prd_nm nvarchar(50),
+-- prd_cost int,
+-- prd_line nvarchar(50),
+-- prd_start_dt datetime,
+-- prd_end_dt datetime,
+-- dwh_create_date Datetime2 default getdate() );
+
+-- insert into silver.crm_prd_info(
+-- prd_id, 
+-- cat_id,
+-- prd_key,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- )
+-- select 
+-- prd_id,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- isnull(prd_cost,0) as prd_cost,
+-- prd_line,
+-- case upper(trim(prd_line)) 
+-- when 'M' then 'Mountain'
+-- when 'R' then 'Road'
+-- when 'T' then 'Touring'
+-- when 'S' then 'Other Sales'
+-- else 'n/a' end as prd_line,
+-- cast (prd_start_dt as date) as prd_start_dt,
+-- cast (lead(prd_start_dt) over (partition by prd_key order by prd_start_dt) -1 as date) as prd_end_dt_test
+-- from bronze.crm_prd_info;
+
+-- select count(*) from silver.crm_prd_info;
+-- select * from silver.crm_prd_info;
+-- select prd_nm from silver.crm_prd_info where prd_nm != trim(prd_nm) ;
+-- select prd_cost from silver.crm_prd_info where prd_cost < 0 or prd_cost is null; select distinct prd_line from silver.crm_prd_info ;
+-- select * from silver.crm_prd_info where prd_end_dt < prd_start_dt;
+
+
+--Table silver.crm_sales_details
+
+-- select * from bronze.crm_sales_details;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details
+-- where sls_ord_num != trim(sls_ord_num) ;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details
+-- where sls_prd_key not in (select prd_key from silver.crm_prd_info) ;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details
+-- where sls_cust_id not in (select cst_id from silver.crm_cust_info) ;
+
+-- select sls_order_id from bronze.crm_sales_details where sls_order_id <= 0; -- sls_order_id in bronze layer but should be sls_order_dt
+
+-- select nullif(sls_order_id ,0) sls_order_dt from bronze.crm_sales_details where sls_order_id <= 0;
+-- select 
+-- nullif(sls_order_id ,0) sls_order_dt
+-- from bronze.crm_sales_details
+-- where sls_order_id <= 0 
+-- or len(sls_order_id) != 8 
+-- or sls_order_id > 20500101 
+-- or sls_order_id < 19000101;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- case when sls_order_id = 0 or len(sls_order_id) != 8 then null
+-- else cast(cast(sls_order_id as varchar) as date) 
+-- end as sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details;
+
+
+-- select nullif(sls_ship_dt ,0) sls_ship_dt from bronze.crm_sales_details where sls_ship_dt <= 0;
+-- select nullif (sls_ship_dt ,0) sls_ship_dt
+-- from bronze.crm_sales_details
+-- where sls_ship_dt <= 0 
+-- or len(sls_ship_dt) != 8 
+-- or sls_ship_dt > 20500101 
+-- or sls_ship_dt < 19000101;
+
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- case 
+--  when sls_order_id = 0 or len(sls_order_id) != 8 then null
+--  else cast(cast(sls_order_id as varchar) as date) 
+-- end as sls_order_dt,
+-- case
+--  when sls_ship_dt = 0 or len(sls_ship_dt) != 8 then null
+--  else cast(cast(sls_ship_dt as varchar) as date) 
+-- end as sls_ship_dt,
+-- case
+--  when sls_due_dt = 0 or len(sls_due_dt) != 8 then null
+--  else cast(cast(sls_due_dt as varchar) as date) 
+-- end as sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details;
+
+
+-- select * from bronze.crm_sales_details where sls_order_id > sls_ship_dt or sls_order_id > sls_due_dt ;
+
+-- select distinct
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from bronze.crm_sales_details
+-- where sls_sales != sls_quantity * sls_price
+-- or sls_sales is null or sls_quantity is null or sls_price is null
+-- or sls_sales <= 0 or sls_quantity <=0 or sls_price <= 0
+-- order by sls_sales,sls_quantity,sls_price;
+
+
+-- select distinct
+-- sls_sales,
+-- sls_quantity,
+-- sls_price as old_sls_price,
+-- case when sls_sales is null or sls_sales<=0 or sls_sales != sls_quantity * abs(sls_price )
+-- then sls_quantity * abs(sls_price) 
+-- else sls_sales end as sls_sales
+-- from bronze.crm_sales_details
+-- where sls_sales != sls_quantity * sls_price
+-- or sls_sales is null or sls_quantity is null or sls_price is null
+-- or sls_sales <= 0 or sls_quantity <=0 or sls_price <= 0;
+
+
+-- select distinct
+-- sls_sales as old_sls_sales,
+-- sls_quantity,
+-- sls_price as old_sls_price,
+-- case 
+--  when sls_sales is null or sls_sales<=0 or sls_sales != sls_quantity * abs(sls_price )
+--  then sls_quantity * abs(sls_price) 
+-- else sls_sales end as sls_sales,
+-- case 
+-- when sls_price is null or sls_price<=0 
+-- then sls_sales / nullif(sls_quantity, 0) 
+-- else sls_price end as sls_price
+-- from bronze.crm_sales_details
+-- where sls_sales != sls_quantity * sls_price
+-- or sls_sales is null or sls_quantity is null or sls_price is null
+-- or sls_sales <= 0 or sls_quantity <=0 or sls_price <= 0
+-- order by sls_sales,sls_quantity,sls_price;
+
+
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- case 
+--  when sls_order_id = 0 or len(sls_order_id) != 8 then null
+--  else cast(cast(sls_order_id as varchar) as date) 
+-- end as sls_order_dt,
+-- case
+--  when sls_ship_dt = 0 or len(sls_ship_dt) != 8 then null
+--  else cast(cast(sls_ship_dt as varchar) as date) 
+-- end as sls_ship_dt,
+-- case
+--  when sls_due_dt = 0 or len(sls_due_dt) != 8 then null
+--  else cast(cast(sls_due_dt as varchar) as date) 
+-- end as sls_due_dt,
+-- case
+--  when sls_sales is null or sls_sales<=0 or sls_sales != sls_quantity * abs(sls_price )
+--  then sls_quantity * abs(sls_price) 
+-- else sls_sales end as sls_sales,
+-- sls_quantity,
+-- case 
+--  when sls_price is null or sls_price<=0 
+--  then sls_sales / nullif(sls_quantity, 0) 
+-- else sls_price end as sls_price
+-- from bronze.crm_sales_details;
+
+--Update the DDL
+
+-- if object_id('silver.crm_sales_details','U') is not null 
+--   drop table silver.crm_sales_details;
+
+--   create table silver.crm_sales_details (
+--   sls_ord_num Nvarchar(50),
+--   sls_prd_key Nvarchar(50),
+--   sls_cust_id int,
+--   sls_order_dt date,
+--   sls_ship_dt date,
+--   sls_due_dt date,
+--   sls_sales int,
+--   sls_quantity int,
+--   sls_price int,
+--   dwh_create_date Datetime2 default getdate()
+-- );
+
+
+
+-- insert into silver.crm_sales_details(
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price    
+-- )
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- case 
+--  when sls_order_id = 0 or len(sls_order_id) != 8 then null
+--  else cast(cast(sls_order_id as varchar) as date) 
+-- end as sls_order_dt,
+-- case
+--  when sls_ship_dt = 0 or len(sls_ship_dt) != 8 then null
+--  else cast(cast(sls_ship_dt as varchar) as date) 
+-- end as sls_ship_dt,
+-- case
+--  when sls_due_dt = 0 or len(sls_due_dt) != 8 then null
+--  else cast(cast(sls_due_dt as varchar) as date) 
+-- end as sls_due_dt,
+-- case 
+--  when sls_sales is null or sls_sales<=0 or sls_sales != sls_quantity * abs(sls_price )
+--  then sls_quantity * abs(sls_price) 
+-- else sls_sales end as sls_sales,
+-- sls_quantity,
+-- case 
+--  when sls_price is null or sls_price<=0 
+--  then sls_sales / nullif(sls_quantity, 0) 
+-- else sls_price end as sls_price
+-- from bronze.crm_sales_details;
+
+
+--Checks for Silver Layer after loading the data
+
+-- select * from silver.crm_sales_details;
+
+-- select distinct
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from silver.crm_sales_details
+-- where sls_sales != sls_quantity * sls_price
+-- or sls_sales is null or sls_quantity is null or sls_price is null
+-- or sls_sales <= 0 or sls_quantity <=0 or sls_price <= 0
+-- order by sls_sales,sls_quantity,sls_price;
+
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from silver.crm_sales_details
+-- where sls_ord_num != trim(sls_ord_num) ;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from silver.crm_sales_details
+-- where sls_prd_key not in (select prd_key from silver.crm_prd_info) ;
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price
+-- from silver.crm_sales_details
+-- where sls_cust_id not in (select cst_id from silver.crm_cust_info) ;
+
+-- select * from silver.crm_sales_details 
+-- where sls_order_dt > sls_ship_dt or sls_order_dt > sls_due_dt;
+
+
+
+--Table erp_cust_az12
+
+
+-- select * from bronze.erp_cust_az12;
+-- select * from silver.crm_cust_info;
+
+-- select 
+-- cid,
+-- bdate,
+-- gen
+-- from bronze.erp_cust_az12;
+
+-- select 
+-- cid,
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- bdate,
+-- gen
+-- from bronze.erp_cust_az12;
+
+-- select 
+-- cid,
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- bdate,
+-- gen
+-- from bronze.erp_cust_az12
+-- where case when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end not in (select distinct cst_key from silver.crm_cust_info);
+
+
+-- select 
+-- cid,
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- bdate,
+-- gen
+-- from bronze.erp_cust_az12
+-- where cid not in (select cst_key from silver.crm_cust_info);
+
+
+-- select 
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- bdate,
+-- gen
+-- from bronze.erp_cust_az12;
+
+-- select distinct
+-- bdate from bronze.erp_cust_az12 
+-- where bdate < '1942-01-01' or bdate > getdate() ;
+
+-- select 
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- case 
+--  when bdate > getdate() then null
+--  else bdate 
+-- end as bdate,
+-- gen
+-- from bronze.erp_cust_az12;
+----where bdate is null;
+
+-- select distinct gen from bronze.erp_cust_az12;
+
+-- select distinct gen ,
+-- case 
+--   when upper(trim(gen)) in ('M','MALE') then 'Male'
+--   when upper(trim(gen)) in ('F','FEMALE') then 'Female' 
+--   else 'n/a'
+-- end as gen   
+-- from bronze.erp_cust_az12;
+
+-- select 
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+-- case 
+--  when bdate > getdate() then null
+--  else bdate 
+-- end as bdate,
+-- case 
+--   when upper(trim(gen)) in ('M','MALE') then 'Male'
+--   when upper(trim(gen)) in ('F','FEMALE') then 'Female' 
+--   else 'n/a'
+-- end as gen   
+-- from bronze.erp_cust_az12;
+
+-- insert into silver.erp_cust_az12
+-- (
+-- cid,
+-- bdate,
+-- gen
+-- )
+-- select 
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+
+-- case 
+--  when bdate > getdate() then null
+--  else bdate 
+-- end as bdate,
+
+-- case 
+--   when upper(trim(gen)) in ('M','MALE') then 'Male'
+--   when upper(trim(gen)) in ('F','FEMALE') then 'Female' 
+--   else 'n/a'
+-- end as gen   
+-- from bronze.erp_cust_az12;
+
+--Checks for Silver Layer after loading erp_cust_az12
+
+-- select  *   from silver.erp_cust_az12;
+-- select distinct gen from silver.erp_cust_az12;
+-- select distinct bdate from silver.erp_cust_az12  
+-- where bdate < '1942-01-01' or bdate > getdate() ;
+
+
+--Table erp_loc_a101
+
+-- select * from bronze.erp_loc_a101;
+-- select 
+-- cid,
+-- cntry from bronze.erp_loc_a101;
+
+-- select cst_key from silver.crm_cust_info;
+
+-- select 
+-- replace (cid,'-','') as cid,
+-- cntry
+-- from bronze.erp_loc_a101;
+
+-- select 
+-- replace (cid,'-','') as cid,
+-- cntry
+-- from bronze.erp_loc_a101
+-- WHERE replace (cid,'-','') not in 
+-- (select cst_key from silver.crm_cust_info);
+
+-- select distinct cntry from bronze.erp_loc_a101 order by cntry;
+
+-- select 
+-- distinct cntry as old,
+-- case 
+--  when trim(cntry) ='DE' then 'Germany'
+--  when trim(cntry) in ('US','USA') then 'United States'
+--  when trim(cntry) ='' or cntry is null then 'n/a'
+-- else trim(cntry) 
+-- end as cntry
+-- from bronze.erp_loc_a101 order by cntry;
+
+
+-- select 
+-- replace (cid,'-','') as cid,
+-- case 
+--  when trim(cntry) ='DE' then 'Germany'
+--  when trim(cntry) in ('US','USA') then 'United States'
+--  when trim(cntry) ='' or cntry is null then 'n/a'
+-- else trim(cntry) 
+-- end as cntry
+-- from bronze.erp_loc_a101;
+
+
+-- insert into silver.erp_loc_a101
+-- (
+--   cid,
+--   cntry
+-- )
+-- select 
+-- replace (cid,'-','') as cid,
+-- case 
+--  when trim(cntry) ='DE' then 'Germany'
+--  when trim(cntry) in ('US','USA') then 'United States'
+--  when trim(cntry) ='' or cntry is null then 'n/a'
+-- else trim(cntry) 
+-- end as cntry
+-- from bronze.erp_loc_a101;
+
+-- select * from silver.erp_loc_a101 ;
+-- select distinct cntry from silver.erp_loc_a101
+
+--Table erp_px_cat_g1v2
+
+-- select * from bronze.erp_px_cat_g1v2;
+
+-- select 
+-- id,
+-- cat,
+-- subcat,
+-- maintenance from bronze.erp_px_cat_g1v2;
+
+-- select * from bronze.erp_px_cat_g1v2 where cat ! = trim(cat) or subcat != trim(subcat) or maintenance != trim(maintenance);
+-- select distinct cat from bronze.erp_px_cat_g1v2;
+-- select distinct subcat from bronze.erp_px_cat_g1v2;
+-- select distinct maintenance from bronze.erp_px_cat_g1v2;
+
+
+-- insert into silver.erp_px_cat_g1v2
+-- (
+--   id,
+--   cat,
+--   subcat,
+--   maintenance
+-- )
+-- select
+-- id,
+-- cat,
+-- subcat,
+-- maintenance
+-- from bronze.erp_px_cat_g1v2;
+
+
+-- select * from silver.erp_px_cat_g1v2;
+
+-- select distinct cat from silver.erp_px_cat_g1v2;
+-- select distinct subcat from silver.erp_px_cat_g1v2;
+-- select distinct maintenance from silver.erp_px_cat_g1v2;
+
+
+--Stored Procedure for Silver Layer
+
+
+-- create or alter procedure silver.load_silver as
+-- begin
+
+-- declare @start_time datetime,@end_time datetime;
+
+--   begin try
+
+--     set @start_time =getdate();
+-- 	print '======================================';
+-- 	print 'Loading Silver Layer';
+-- 	print '======================================';
+
+	
+
+-- 	Print '****************************************';
+-- 	Print 'Loading CRM Tables';
+-- 	Print '****************************************';
+
+-- 	set @start_time =getdate();
+
+--   Print '>> Truncating Table: silver.crm_cust_info';
+--   TRUNCATE TABLE silver.crm_cust_info;
+--   Print '>> Inserting Data Into: silver.crm_cust_info';
+--   insert into silver.crm_cust_info
+--   (
+--   cst_id,
+--   cst_key,    
+--   cst_firstname,
+--   cst_lastname,
+--   cst_material_status,
+--   cst_gender,
+--   cst_create_date
+--   )
+
+--   select 
+--   cst_id,
+--   cst_key,
+--   trim(cst_firstname) as cst_firstname,
+--   trim(cst_lastname) as cst_lastname,
+--   case when upper(trim(cst_material_status)) = 'M' then 'Married'
+--   when upper(trim(cst_material_status)) = 'S' then 'Single'
+--   else 'n/a' end  cst_material_status,
+--   case when upper(trim(cst_gender)) = 'M' then 'Male'
+--   when upper(trim(cst_gender)) = 'F' then 'Female'
+--   else 'n/a' end as cst_gender,
+--   cst_create_date
+--   from (
+--   select *, row_number() over (partition by cst_id order by cst_create_date desc) as flag_last 
+--   from Silver.crm_cust_info where cst_id is not null
+--   )t where flag_last = 1;
+
+--  set @end_time =getdate();
+
+--  print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+--  Print '****************************************';
+
+ 
+-- /*
+-- if object_id('silver.crm_prd_info','U') is not null 
+-- drop table silver.crm_prd_info;
+
+-- create table silver.crm_prd_info (
+-- prd_id int,
+-- cat_id nvarchar(50),
+-- prd_key nvarchar(50),
+-- prd_nm nvarchar(50),
+-- prd_cost int,
+-- prd_line nvarchar(50),
+-- prd_start_dt datetime,
+-- prd_end_dt datetime,
+-- dwh_create_date Datetime2 default getdate() );
+
+-- */
+
+
+-- set @start_time =getdate();
+
+-- Print '>> Truncating Table: silver.crm_prd_info';
+-- TRUNCATE TABLE silver.crm_prd_info;
+-- Print '>> Inserting Data Into: silver.crm_prd_info';
+
+-- insert into silver.crm_prd_info(
+-- prd_id, 
+-- cat_id,
+-- prd_key,
+-- prd_nm,
+-- prd_cost,
+-- prd_line,
+-- prd_start_dt,
+-- prd_end_dt
+-- )
+
+-- select 
+-- prd_id,
+-- replace(substring(prd_key,1,5), '-', '_') as cat_id,
+-- substring(prd_key,7,len(prd_key)) as prd_key,
+-- prd_nm,
+-- isnull(prd_cost,0) as prd_cost,
+-- case upper(trim(prd_line)) 
+-- when 'M' then 'Mountain'
+-- when 'R' then 'Road'
+-- when 'T' then 'Touring'
+-- when 'S' then 'Other Sales'
+-- else 'n/a' end as prd_line,
+-- cast (prd_start_dt as date) as prd_start_dt,
+-- cast (lead(prd_start_dt) over (partition by prd_key order by prd_start_dt) -1 as date) as prd_end_dt_test
+-- from bronze.crm_prd_info;
+
+--  set @end_time =getdate();
+
+--  print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+--  Print '****************************************'; 
+
+
+
+
+
+
+-- /*
+-- if object_id('silver.crm_sales_details','U') is not null 
+--   drop table silver.crm_sales_details;
+
+--   create table silver.crm_sales_details (
+--   sls_ord_num Nvarchar(50),
+--   sls_prd_key Nvarchar(50),
+--   sls_cust_id int,
+--   sls_order_dt date,
+--   sls_ship_dt date,
+--   sls_due_dt date,
+--   sls_sales int,
+--   sls_quantity int,
+--   sls_price int,
+--   dwh_create_date Datetime2 default getdate()
+-- );
+
+-- */
+
+-- set @start_time =getdate();
+
+-- Print '>> Truncating Table: silver.crm_sales_details';
+-- TRUNCATE TABLE silver.crm_sales_details;
+-- Print '>> Inserting Data Into: silver.crm_sales_details';
+-- insert into silver.crm_sales_details(
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- sls_order_dt,
+-- sls_ship_dt,
+-- sls_due_dt,
+-- sls_sales,
+-- sls_quantity,
+-- sls_price    
+-- )
+
+-- select 
+-- sls_ord_num,
+-- sls_prd_key,
+-- sls_cust_id,
+-- case 
+--  when sls_order_id = 0 or len(sls_order_id) != 8 then null
+--  else cast(cast(sls_order_id as varchar) as date) 
+-- end as sls_order_dt,
+-- case
+--  when sls_ship_dt = 0 or len(sls_ship_dt) != 8 then null
+--  else cast(cast(sls_ship_dt as varchar) as date) 
+-- end as sls_ship_dt,
+-- case
+--  when sls_due_dt = 0 or len(sls_due_dt) != 8 then null
+--  else cast(cast(sls_due_dt as varchar) as date) 
+-- end as sls_due_dt,
+-- case 
+--  when sls_sales is null or sls_sales<=0 or sls_sales != sls_quantity * abs(sls_price )
+--  then sls_quantity * abs(sls_price) 
+-- else sls_sales end as sls_sales,
+-- sls_quantity,
+-- case 
+--  when sls_price is null or sls_price<=0 
+--  then sls_sales / nullif(sls_quantity, 0) 
+-- else sls_price end as sls_price
+-- from bronze.crm_sales_details;
+
+
+--  set @end_time =getdate();
+
+--  print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+
+
+-- 	Print '****************************************';
+-- 	Print 'Loading ERP Tables';
+-- 	Print '****************************************';
+
+-- set @start_time =getdate();
+
+-- Print '>> Truncating Table: silver.erp_cust_az12';
+-- TRUNCATE TABLE silver.erp_cust_az12;
+-- Print '>> Inserting Data Into: silver.erp_cust_az12';
+
+-- insert into silver.erp_cust_az12
+-- (
+-- cid,
+-- bdate,
+-- gen
+-- )
+
+-- select 
+-- case 
+--  when cid like 'NAS%' 
+--  then SUBSTRING(cid, 4, LEN(cid) )
+-- else cid end as cid,
+
+-- case 
+--  when bdate > getdate() then null
+--  else bdate 
+-- end as bdate,
+
+-- case 
+--   when upper(trim(gen)) in ('M','MALE') then 'Male'
+--   when upper(trim(gen)) in ('F','FEMALE') then 'Female' 
+--   else 'n/a'
+-- end as gen   
+-- from bronze.erp_cust_az12;
+
+
+-- set @end_time =getdate();
+
+-- print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+-- Print '****************************************';
+
+ 
+ 
+-- set @start_time =getdate();
+
+-- Print '>> Truncating Table: silver.erp_loc_a101';
+-- TRUNCATE TABLE silver.erp_loc_a101;
+-- Print '>> Inserting Data Into: silver.erp_loc_a101';
+
+-- insert into silver.erp_loc_a101
+-- (
+--   cid,
+--   cntry
+-- )
+
+-- select 
+-- replace (cid,'-','') as cid,
+-- case 
+--  when trim(cntry) ='DE' then 'Germany'
+--  when trim(cntry) in ('US','USA') then 'United States'
+--  when trim(cntry) ='' or cntry is null then 'n/a'
+-- else trim(cntry) 
+-- end as cntry
+-- from bronze.erp_loc_a101;
+
+-- set @end_time =getdate();
+
+-- print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+-- Print '****************************************';
+
+
+-- set @start_time =getdate();
+
+-- Print '>> Truncating Table: silver.erp_px_cat_g1v2';
+-- TRUNCATE TABLE silver.erp_px_cat_g1v2;
+-- Print '>> Inserting Data Into: silver.erp_px_cat_g1v2';
+
+-- insert into silver.erp_px_cat_g1v2
+-- (
+--   id,
+--   cat,
+--   subcat,
+--   maintenance
+-- )
+
+-- select
+-- id,
+-- cat,
+-- subcat,
+-- maintenance
+-- from bronze.erp_px_cat_g1v2;
+
+--  set @end_time =getdate();
+
+--  print'>> Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+--  Print '****************************************';
+
+
+--  set @end_time =getdate();
+
+--  Print '****************************************';
+--  Print 'Loading Silver Layer is Completed';
+--  Print '****************************************';
+
+--  print'>> Total Load Duration:' + cast(datediff(second,@start_time,@end_time )as nvarchar) + 'seconds';
+
+
+--     end try
+
+-- 	begin catch
+
+-- 	print '=================================================';
+-- 	print 'Error Occured During Loading Silver Layer';
+-- 	print 'Error Message' + Error_Message();
+-- 	print 'Error Message' + Cast(Error_Number() as Nvarchar);
+-- 	print 'Error Message' + Cast(Error_State() as Nvarchar);
+-- 	print 'Error Occured During Loading Silver Layer';
+-- 	print '=================================================';
+
+-- 	end catch
+
+-- end;
+
+-- exec silver.load_silver;
+
+
+-- Load both Layers
+-- exec bronze.load_silver;
+-- exec silver.load_silver;
